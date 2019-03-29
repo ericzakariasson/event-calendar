@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { WEEK_DAYS } from '../constants';
-import { generateCells, isWholeHour, parseEvent, getWeekFromDate, sortEvent, assignColor } from '../helpers';
+import {
+  generateCells,
+  isWholeHour,
+  parseEvent,
+  getWeekFromDate,
+  sortEvent,
+  getNextWeek,
+  getPreviousWeek,
+  getWeekNumber,
+} from '../helpers';
 import { useCalendarEvents } from '../context/CalendarEventContext';
 
 import Day from './Day';
@@ -40,11 +49,6 @@ const Week = styled.section`
 
 const cells = generateCells();
 
-function getNextWeek(week) {
-  const lastDay = week[week.length - 1];
-  console.log(lastDay);
-}
-
 const Calendar = () => {
   const [week, setWeek] = useState([]);
   const { events, eventMap, setEvents } = useCalendarEvents();
@@ -55,10 +59,7 @@ const Calendar = () => {
       const res = await fetch(process.env.REACT_APP_API_URL);
       const json = await res.json();
 
-      const data = json
-        .map(parseEvent)
-        .sort(sortEvent)
-        .map(assignColor);
+      const data = json.map(parseEvent).sort(sortEvent);
 
       setEvents(data);
       setLoading(false);
@@ -76,18 +77,30 @@ const Calendar = () => {
     setWeek(initialWeek);
   }, [events]);
 
+  function goToNextWeek() {
+    const nextWeek = getNextWeek(week);
+    setWeek(nextWeek);
+  }
+
+  function goToPreviousWeek() {
+    const nextWeek = getPreviousWeek(week);
+    setWeek(nextWeek);
+  }
+
   if (loading) {
     return <h1>Laddar...</h1>;
   }
 
   return (
     <Wrapper>
+      <button onClick={goToPreviousWeek}>Förra vecka</button>
       <Labels>{cells.map(cell => isWholeHour(cell) && <Label key={cell.position}>{cell.hour}:00</Label>)}</Labels>
       <Week>
         {week.map((date, i) => (
           <Day key={date.getDate()} events={eventMap[date.getTime()]} cells={cells} date={date} day={WEEK_DAYS[i]} />
         ))}
       </Week>
+      <button onClick={goToNextWeek}>Nästa vecka</button>
     </Wrapper>
   );
 };

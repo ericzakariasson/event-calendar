@@ -12,8 +12,9 @@ const Wrapper = styled.article`
   width: 95%;
   padding: 10px;
   z-index: 1;
-  transform: translateY(${p => (p.hovered ? '-2px' : 0)});
+  transform: translateY(${p => (p.active ? '-2px' : 0)});
   word-break: break-all;
+  cursor: pointer;
 `;
 
 const Background = styled.div`
@@ -24,9 +25,9 @@ const Background = styled.div`
   height: 100%;
   background: ${p => p.theme.colors.event[p.activity].background};
   z-index: -1;
-  opacity: ${p => (p.hovered ? 0.95 : 0.5)};
+  opacity: ${p => (p.active ? 0.95 : 0.5)};
   transition: ${p => p.theme.transition};
-  box-shadow: ${p => p.hovered && '0 4px 8px rgba(0,0,0,0.1)'};
+  box-shadow: ${p => p.active && '0 4px 8px rgba(0,0,0,0.1)'};
   border-radius: 4px;
 
   ${p =>
@@ -53,7 +54,6 @@ const Activity = styled.h3`
 const Location = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
 
   svg {
     opacity: 0.5;
@@ -68,6 +68,7 @@ const LocationText = styled.h4`
 
 const Starts = styled.p`
   font-size: 0.8rem;
+  margin-top: 10px;
 `;
 
 const Ends = styled(Starts)`
@@ -83,7 +84,7 @@ const formatOptions = {
 };
 
 const Event = ({ id, start, end }) => {
-  const { event, isHovered, bind } = useCalendarEvent(id);
+  const { event, isHovered, isSelected, bind, handleDeselect } = useCalendarEvent(id);
 
   const height = end.position - start.position;
   const tooSmall = height < 3;
@@ -91,16 +92,18 @@ const Event = ({ id, start, end }) => {
   const isEnd = end.position === 48;
   const isStart = start.position === 0;
 
+  const isActive = isHovered || isSelected;
+
   return (
-    <Wrapper hovered={isHovered} start={start.position} height={height} {...bind}>
+    <Wrapper active={isActive} start={start.position} height={height} {...bind}>
       <Activity activity={event.activity}>{event.activity}</Activity>
       <Location>
         <MapPin size={14} />
         <LocationText>{event.location}</LocationText>
       </Location>
-      {!isStart && !tooSmall && <Starts>Börjar {start.time.toLocaleTimeString('sv-se', formatOptions)}</Starts>}
-      {!isEnd && !tooSmall && <Ends>Slutar {end.time.toLocaleTimeString('sv-se', formatOptions)}</Ends>}
-      <Background isEnd={isEnd} isStart={isStart} activity={event.activity} hovered={isHovered} />
+      {!isStart && !tooSmall && <Starts>Starts {start.time.toLocaleTimeString('sv-se', formatOptions)}</Starts>}
+      {!isEnd && !tooSmall && <Ends>Ends {end.time.toLocaleTimeString('sv-se', formatOptions)}</Ends>}
+      <Background isEnd={isEnd} isStart={isStart} activity={event.activity} active={isActive} />
     </Wrapper>
   );
 };

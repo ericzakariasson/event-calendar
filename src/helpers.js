@@ -187,15 +187,17 @@ export function generateCells() {
   });
 }
 
-function generateColor(id) {
-  return '#' + (((Number(id) / 10) * 0xffffff) << 0).toString(16);
+export function getNextWeek(week) {
+  const lastDay = week[week.length - 1];
+  const firstDayOfWeek = addDays(lastDay, 1);
+  const nextWeek = getWeekFromDate(firstDayOfWeek);
+  return nextWeek;
 }
 
-export function assignColor(event) {
-  const color = generateColor(event.id);
-
-  return {
-    ...event,
-    color,
-  };
+export function getPreviousWeek(week) {
+  const lastDay = week[week.length - 1];
+  const firstDayOfWeek = addDays(lastDay, -7);
+  console.log(firstDayOfWeek);
+  const previousWeek = getWeekFromDate(firstDayOfWeek);
+  return previousWeek;
 }

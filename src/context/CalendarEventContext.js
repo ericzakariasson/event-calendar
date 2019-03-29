@@ -7,6 +7,7 @@ export const CalendarEventsProvider = ({ children }) => {
   const [events, setEvents] = useState([]);
   const [eventMap, setEventMap] = useState({});
   const [hovered, setHovered] = useState('');
+  const [selected, setSelected] = useState('');
 
   useEffect(() => {
     const createdEventMap = createEventMap(events);
@@ -21,13 +22,24 @@ export const CalendarEventsProvider = ({ children }) => {
     setHovered('');
   }
 
+  function handleSelect(id) {
+    setSelected(id);
+  }
+
+  function handleDeselect() {
+    setSelected('');
+  }
+
   const state = {
     events,
     eventMap,
     setEvents,
     hovered,
+    selected,
     handleMouseEnter,
     handleMouseLeave,
+    handleSelect,
+    handleDeselect,
   };
 
   return <CalendarEventsContext.Provider value={state}>{children}</CalendarEventsContext.Provider>;

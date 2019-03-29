@@ -1,30 +1,30 @@
 export const WEEK_DAYS = [
   {
-    name: 'Måndag',
+    name: 'Monday',
     index: 0,
   },
   {
-    name: 'Tisdag',
+    name: 'Tuesday',
     index: 1,
   },
   {
-    name: 'Onsdag',
+    name: 'Wednesday',
     index: 2,
   },
   {
-    name: 'Torsdag',
+    name: 'Thursday',
     index: 3,
   },
   {
-    name: 'Fredag',
+    name: 'Friday',
     index: 4,
   },
   {
-    name: 'Lördag',
+    name: 'Saturday',
     index: 5,
   },
   {
-    name: 'Söndag',
+    name: 'Sunday',
     index: 6,
   },
 ];

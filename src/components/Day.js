@@ -65,12 +65,13 @@ const Timeline = styled.section`
 `;
 
 const Day = ({ day, date, cells, events }) => {
+  const month = date.getMonth();
   return (
     <Wrapper>
       <Header>
         <Name>{day.name}</Name>
         <Date>
-          {date.getDate()}/{date.getMonth()}
+          {date.getDate()}/{month === 0 ? 12 : month}
         </Date>
       </Header>
       <TimelineWrapper>
