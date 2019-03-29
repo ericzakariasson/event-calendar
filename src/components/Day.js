@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
+import Event from './Event';
 
 const Wrapper = styled.article`
   flex: 1;
@@ -13,20 +14,20 @@ const Wrapper = styled.article`
 const Name = styled.h1`
   text-align: center;
   font-weight: normal;
-  height: 3rem;
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: 0.5rem;
 `;
 
-const Timeline = styled.ul`
+const Cells = styled.ul`
   list-style: none;
 `;
 
 const Cell = styled.li`
   width: 100%;
-  height: 1.5rem;
-  border-bottom: 1px solid #fcfcfc;
+  height: ${p => p.theme.cellHeight}px;
+  border-bottom: 1px solid #f5f5f5;
 
   &:nth-child(even) {
     border-color: #eee;
@@ -39,6 +40,8 @@ const Cell = styled.li`
 
 const Date = styled.span`
   text-align: center;
+  color: #ccc;
+  font-weight: 500;
 `;
 
 const Header = styled.header`
@@ -46,9 +49,22 @@ const Header = styled.header`
   flex-direction: column;
   height: 5rem;
   border-bottom: 1px solid #eee;
+  justify-content: center;
 `;
 
-const Day = ({ day, date, cells }) => {
+const TimelineWrapper = styled.div`
+  position: relative;
+`;
+
+const Timeline = styled.section`
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+`;
+
+const Day = ({ day, date, cells, events }) => {
   return (
     <Wrapper>
       <Header>
@@ -57,11 +73,14 @@ const Day = ({ day, date, cells }) => {
           {date.getDate()}/{date.getMonth()}
         </Date>
       </Header>
-      <Timeline>
-        {cells.map(cell => (
-          <Cell key={cell.position} title={cell.formatted} />
-        ))}
-      </Timeline>
+      <TimelineWrapper>
+        <Timeline>{events && events.map(event => <Event key={event.id} {...event} />)}</Timeline>
+        <Cells>
+          {cells.map(cell => (
+            <Cell key={cell.position} title={cell.formatted} />
+          ))}
+        </Cells>
+      </TimelineWrapper>
     </Wrapper>
   );
 };
