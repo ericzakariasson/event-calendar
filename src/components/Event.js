@@ -31,17 +31,18 @@ const Background = styled.div`
   border-radius: 4px;
 
   ${p =>
-    p.isEnd &&
+    p.hasStart &&
     css`
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
-    `}
+    `};
+
   ${p =>
-    p.isStart &&
+    p.hasEnd &&
     css`
       border-top-left-radius: 0;
       border-top-right-radius: 0;
-    `};
+    `}
 `;
 
 const Activity = styled.h3`
@@ -78,32 +79,57 @@ const Ends = styled(Starts)`
   font-size: 0.8rem;
 `;
 
+const DragHandle = styled.div`
+  height: 3px;
+  background: #fff;
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  border-radius: 100px;
+  opacity: ${p => (p.visible ? 1 : 0)};
+  transition: 0.3s ease-in-out;
+  cursor: row-resize;
+`;
+
+const StartHandle = styled(DragHandle)`
+  top: 5px;
+`;
+
+const EndHandle = styled(DragHandle)`
+  bottom: 5px;
+`;
+
 const formatOptions = {
   hour: '2-digit',
   minute: '2-digit',
 };
 
 const Event = ({ id, start, end }) => {
-  const { event, isHovered, isSelected, bind, handleDeselect } = useCalendarEvent(id);
+  const { event, isHovered, isSelected, bind, bindHandle } = useCalendarEvent(id);
 
   const height = end.position - start.position;
-  const tooSmall = height < 3;
+  const isSmall = height < 3;
 
-  const isEnd = end.position === 48;
-  const isStart = start.position === 0;
+  const hasStart = start.position !== 0;
+  const hasEnd = end.position !== 48;
 
   const isActive = isHovered || isSelected;
 
   return (
     <Wrapper active={isActive} start={start.position} height={height} {...bind}>
+      {hasStart && <StartHandle visible={isHovered} {...bindHandle('start')} />}
+
       <Activity activity={event.activity}>{event.activity}</Activity>
       <Location>
         <MapPin size={14} />
         <LocationText>{event.location}</LocationText>
       </Location>
-      {!isStart && !tooSmall && <Starts>Starts {start.time.toLocaleTimeString('sv-se', formatOptions)}</Starts>}
-      {!isEnd && !tooSmall && <Ends>Ends {end.time.toLocaleTimeString('sv-se', formatOptions)}</Ends>}
-      <Background isEnd={isEnd} isStart={isStart} activity={event.activity} active={isActive} />
+      {hasStart && !isSmall && <Starts>Starts {start.time.toLocaleTimeString('sv-se', formatOptions)}</Starts>}
+      {hasEnd && !isSmall && <Ends>Ends {end.time.toLocaleTimeString('sv-se', formatOptions)}</Ends>}
+
+      {hasEnd && <EndHandle visible={isHovered} {...bindHandle('end')} />}
+
+      <Background hasEnd={hasEnd} hasStart={hasStart} activity={event.activity} active={isActive} />
     </Wrapper>
   );
 };

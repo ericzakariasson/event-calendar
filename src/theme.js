@@ -1,5 +1,5 @@
 export const theme = {
-  cellHeight: 30,
+  cellHeight: 20,
   colors: {
     primary: '#3f51b5',
     event: {

@@ -49,9 +49,14 @@ const Week = styled.section`
 
 const cells = generateCells();
 
+function normalizeEvent(obj, item) {
+  obj[item.id] = item;
+  return obj;
+}
+
 const Calendar = () => {
   const [week, setWeek] = useState([]);
-  const { events, eventMap, setEvents } = useCalendarEvents();
+  const { eventArray, eventMap, setEvents } = useCalendarEvents();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -59,7 +64,12 @@ const Calendar = () => {
       const res = await fetch(process.env.REACT_APP_API_URL);
       const json = await res.json();
 
-      const data = json.map(parseEvent).sort(sortEvent);
+      const data = json
+        .map(parseEvent)
+        .sort(sortEvent)
+        .reduce(normalizeEvent, {});
+
+      console.log(data);
 
       setEvents(data);
       setLoading(false);
@@ -68,14 +78,14 @@ const Calendar = () => {
   }, []);
 
   useEffect(() => {
-    if (events.length === 0) {
+    if (eventArray.length === 0) {
       return;
     }
 
-    const firstEventDate = events[0].startDate;
+    const firstEventDate = eventArray.sort(sortEvent)[0].startDate;
     const initialWeek = getWeekFromDate(firstEventDate);
     setWeek(initialWeek);
-  }, [events]);
+  }, [eventArray]);
 
   function goToNextWeek() {
     const nextWeek = getNextWeek(week);

@@ -67,11 +67,13 @@ export function setMidnight(date) {
 }
 
 export function createEventMap(events) {
-  if (Object.keys(events).length === 0) {
+  const eventArray = Object.keys(events).map(key => events[key]);
+
+  if (eventArray.length === 0) {
     return {};
   }
 
-  return events.reduce((eventMap, event) => {
+  return eventArray.reduce((eventMap, event) => {
     const { startDate, endDate } = event;
     const { isSameDay, day } = sameDay(startDate, endDate);
 
@@ -200,4 +202,8 @@ export function getPreviousWeek(week) {
   console.log(firstDayOfWeek);
   const previousWeek = getWeekFromDate(firstDayOfWeek);
   return previousWeek;
+}
+
+export function setTime(date, { hours, minutes }) {
+  return new Date(new Date(date).setHours(hours, minutes));
 }
