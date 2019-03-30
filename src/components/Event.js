@@ -1,16 +1,15 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled, { css, withTheme } from 'styled-components';
 
-import { useCalendarEvent } from '../hooks';
+import { useCalendarEvent, useHandle } from '../hooks';
 
 import { MapPin } from 'react-feather';
 
 const Wrapper = styled.article`
   position: absolute;
   top: ${p => p.theme.cellHeight * p.start}px;
-  height: ${p => p.theme.cellHeight * p.height - 1}px;
   width: 95%;
-  padding: 10px;
+  padding: 10px 10px;
   z-index: 1;
   transform: translateY(${p => (p.active ? '-2px' : 0)});
   word-break: break-all;
@@ -25,7 +24,7 @@ const Background = styled.div`
   height: 100%;
   background: ${p => p.theme.colors.event[p.activity].background};
   z-index: -1;
-  opacity: ${p => (p.active ? 0.95 : 0.5)};
+  opacity: ${p => (p.active ? 0.75 : 0.5)};
   transition: ${p => p.theme.transition};
   box-shadow: ${p => p.active && '0 4px 8px rgba(0,0,0,0.1)'};
   border-radius: 4px;
@@ -80,11 +79,11 @@ const Ends = styled(Starts)`
 `;
 
 const DragHandle = styled.div`
-  height: 3px;
-  background: #fff;
+  height: 4px;
+  background: ${p => p.theme.colors.event[p.activity].handle};
   position: absolute;
-  left: 5px;
-  right: 5px;
+  left: 0;
+  right: 0;
   border-radius: 100px;
   opacity: ${p => (p.visible ? 1 : 0)};
   transition: 0.3s ease-in-out;
@@ -92,11 +91,11 @@ const DragHandle = styled.div`
 `;
 
 const StartHandle = styled(DragHandle)`
-  top: 5px;
+  top: 0;
 `;
 
 const EndHandle = styled(DragHandle)`
-  bottom: 5px;
+  bottom: 0;
 `;
 
 const formatOptions = {
@@ -104,30 +103,47 @@ const formatOptions = {
   minute: '2-digit',
 };
 
-const Event = ({ id, start, end }) => {
-  const { event, isHovered, isSelected, bind, bindHandle } = useCalendarEvent(id);
+const Event = ({ id, start, end, theme }) => {
+  const { event, isHovered, isSelected, bind, handleDrag } = useCalendarEvent(id);
 
-  const height = end.position - start.position;
-  const isSmall = height < 3;
+  const initialPositions = {
+    start: start.position,
+    end: end.position,
+  };
 
-  const hasStart = start.position !== 0;
-  const hasEnd = end.position !== 48;
+  const { style, hasStart, hasEnd, isSmall, isDragging, handleMouseDown } = useHandle(
+    id,
+    initialPositions,
+    handleDrag
+  );
 
-  const isActive = isHovered || isSelected;
+  const isActive = isHovered || isSelected || isDragging;
+
+  const bindHandle = handle => ({
+    onMouseDown: () => handleMouseDown(handle),
+  });
 
   return (
-    <Wrapper active={isActive} start={start.position} height={height} {...bind}>
-      {hasStart && <StartHandle visible={isHovered} {...bindHandle('start')} />}
+    <Wrapper style={style} active={isActive} {...bind}>
+      {hasStart && (
+        <StartHandle visible={isActive} activity={event.activity} {...bindHandle('start')} />
+      )}
 
       <Activity activity={event.activity}>{event.activity}</Activity>
       <Location>
         <MapPin size={14} />
         <LocationText>{event.location}</LocationText>
       </Location>
-      {hasStart && !isSmall && <Starts>Starts {start.time.toLocaleTimeString('sv-se', formatOptions)}</Starts>}
-      {hasEnd && !isSmall && <Ends>Ends {end.time.toLocaleTimeString('sv-se', formatOptions)}</Ends>}
 
-      {hasEnd && <EndHandle visible={isHovered} {...bindHandle('end')} />}
+      {hasStart && !isSmall && (
+        <Starts>Starts {start.time.toLocaleTimeString('sv-se', formatOptions)}</Starts>
+      )}
+
+      {hasEnd && !isSmall && (
+        <Ends>Ends {end.time.toLocaleTimeString('sv-se', formatOptions)}</Ends>
+      )}
+
+      {hasEnd && <EndHandle visible={isActive} activity={event.activity} {...bindHandle('end')} />}
 
       <Background hasEnd={hasEnd} hasStart={hasStart} activity={event.activity} active={isActive} />
     </Wrapper>

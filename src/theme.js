@@ -6,10 +6,12 @@ export const theme = {
       meeting: {
         background: '#a798f7',
         text: '#281d5f',
+        handle: '#6c5bbf',
       },
       lunch: {
         background: '#fff5e0',
         text: '#503a0d',
+        handle: '#f3ce83',
       },
     },
   },

@@ -69,8 +69,6 @@ const Calendar = () => {
         .sort(sortEvent)
         .reduce(normalizeEvent, {});
 
-      console.log(data);
-
       setEvents(data);
       setLoading(false);
     }
@@ -104,10 +102,18 @@ const Calendar = () => {
   return (
     <Wrapper>
       <button onClick={goToPreviousWeek}>Förra vecka</button>
-      <Labels>{cells.map(cell => isWholeHour(cell) && <Label key={cell.position}>{cell.hour}:00</Label>)}</Labels>
+      <Labels>
+        {cells.map(cell => isWholeHour(cell) && <Label key={cell.position}>{cell.hour}:00</Label>)}
+      </Labels>
       <Week>
         {week.map((date, i) => (
-          <Day key={date.getDate()} events={eventMap[date.getTime()]} cells={cells} date={date} day={WEEK_DAYS[i]} />
+          <Day
+            key={date.getDate()}
+            events={eventMap[date.getTime()]}
+            cells={cells}
+            date={date}
+            day={WEEK_DAYS[i]}
+          />
         ))}
       </Week>
       <button onClick={goToNextWeek}>Nästa vecka</button>

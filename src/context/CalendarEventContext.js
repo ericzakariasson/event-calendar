@@ -19,7 +19,9 @@ export const CalendarEventsProvider = ({ children }) => {
   }, [events]);
 
   function handleMouseEnter(id) {
-    setHovered(id);
+    if (!moving.id) {
+      setHovered(id);
+    }
   }
 
   function handleMouseLeave() {
@@ -34,25 +36,29 @@ export const CalendarEventsProvider = ({ children }) => {
     setSelected('');
   }
 
-  function handleMouseDown(id, handle, e) {
+  function handleMouseDown(id, handle) {
+    console.log('CONTEXT MOUSE DOWN');
     setMoving({ id, handle });
   }
 
-  function handleMouseUp(id, handle, e) {
-    setMoving({ id: '', handle: '' });
+  function handleMouseUp(id, position) {
+    console.log('CONTEXT MOUSE UP');
+
+    updateEvent(position);
+
+    // setMoving({ id: '', handle: '' });
   }
 
-  function handleMouseMove(e) {
-    const { offsetY } = e;
+  function updateEvent(position) {
+    const handle = moving.handle + 'Date';
+    const affectedPosition = position[moving.handle];
 
-    const exactPosition = offsetY / (theme.cellHeight * 2);
-    const position = Math.round(exactPosition * 2) / 2; // To half hour
-    const hours = Math.trunc(position);
-    const minutes = (position - hours) * 60;
+    const timePosition = affectedPosition / 2;
 
+    const hours = Math.trunc(timePosition);
+    const minutes = (timePosition - hours) * 60;
     const event = events[moving.id];
 
-    const handle = moving.handle + 'Date';
     const newDate = setTime(event[handle], { hours, minutes });
 
     const updatedEvent = {
@@ -82,7 +88,6 @@ export const CalendarEventsProvider = ({ children }) => {
     handleDeselect,
     handleMouseDown,
     handleMouseUp,
-    handleMouseMove,
   };
 
   return <CalendarEventsContext.Provider value={state}>{children}</CalendarEventsContext.Provider>;

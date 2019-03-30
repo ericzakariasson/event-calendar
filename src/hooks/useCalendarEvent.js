@@ -13,8 +13,8 @@ function useCalendarEvent(id) {
     handleDeselect,
     handleMouseDown,
     handleMouseUp,
-    handleMouseMove,
   } = useCalendarEvents();
+
   const event = events[id];
   const isHovered = hovered === id;
   const isSelected = selected === id;
@@ -26,24 +26,12 @@ function useCalendarEvent(id) {
     onClick: () => (isSelected ? handleDeselect() : handleSelect(id)),
   };
 
-  const bindHandle = handle => ({
-    onMouseDown: () => handleMouseDown(id, handle),
-    onMouseUp: () => handleMouseUp(id, handle),
-    onMouseMove: e => (isMoving ? handleMouseMove(e) : undefined),
-  });
+  const handleDrag = {
+    onMouseDown: (id, handle) => handleMouseDown(id, handle),
+    onMouseUp: (id, handle) => handleMouseUp(id, handle),
+  };
 
-  useEffect(() => {
-    if (isMoving) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-    }
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [moving]);
-
-  return { event, isHovered, isSelected, bind, bindHandle };
+  return { event, isHovered, isSelected, isMoving, bind, handleDrag };
 }
 
 export default useCalendarEvent;
