@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { theme } from '../theme';
+import { positionToTimeString } from '../helpers';
 
 function useHandle(id, initialPositions, handleDrag) {
   const [startPosition, setStartPosition] = useState(0);
@@ -30,9 +31,9 @@ function useHandle(id, initialPositions, handleDrag) {
   }
 
   function handleMouseMove(e) {
+    const { offsetY } = e;
     console.log(e);
-    const { pageY } = e;
-    const exactPosition = (pageY - 120) / (theme.cellHeight * 2);
+    const exactPosition = offsetY / (theme.cellHeight * 2);
     const position = Math.round(exactPosition * 2);
     setPosition[activeHandle](position);
   }
@@ -66,14 +67,24 @@ function useHandle(id, initialPositions, handleDrag) {
   const hasStart = startPosition !== 0;
   const hasEnd = endPosition !== 48;
 
-  const isSmall = height < 3 * theme.cellHeight;
+  const isSmall = height <= 4 * theme.cellHeight;
 
   const isDragging = activeHandle !== '';
 
+  const start = {
+    position: startPosition,
+    time: positionToTimeString(startPosition),
+  };
+
+  const end = {
+    position: endPosition,
+    time: positionToTimeString(endPosition),
+  };
+
   return {
     style,
-    startPosition,
-    endPosition,
+    start,
+    end,
     handleMouseDown,
     hasStart,
     hasEnd,

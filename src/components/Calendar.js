@@ -3,42 +3,28 @@ import styled from 'styled-components';
 import { WEEK_DAYS } from '../constants';
 import {
   generateCells,
-  isWholeHour,
   parseEvent,
   getWeekFromDate,
   sortEvent,
   getNextWeek,
   getPreviousWeek,
   getWeekNumber,
+  sameDay,
 } from '../helpers';
 import { useCalendarEvents } from '../context/CalendarEventContext';
 
 import Day from './Day';
+import SelectWeek from './SelectWeek';
+import TimeLabels from './TimeLabels';
 
-const Labels = styled.ul`
-  list-style: none;
+const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin-top: 5rem;
 `;
 
-const Label = styled.li`
-  flex: 1;
-  padding: 0 1rem;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.5;
-  font-size: 0.8rem;
+const Header = styled.header``;
 
-  &:hover {
-    opacity: 1;
-  }
-`;
-
-const Wrapper = styled.main`
+const Main = styled.main`
   display: flex;
 `;
 
@@ -54,8 +40,14 @@ function normalizeEvent(obj, item) {
   return obj;
 }
 
+const parseEvents = json =>
+  json
+    .map(parseEvent)
+    .sort(sortEvent)
+    .reduce(normalizeEvent, {});
+
 const Calendar = () => {
-  const [week, setWeek] = useState([]);
+  const [week, setWeek] = useState([...WEEK_DAYS]);
   const { eventArray, eventMap, setEvents } = useCalendarEvents();
   const [loading, setLoading] = useState(true);
 
@@ -63,12 +55,7 @@ const Calendar = () => {
     async function fetchEvents() {
       const res = await fetch(process.env.REACT_APP_API_URL);
       const json = await res.json();
-
-      const data = json
-        .map(parseEvent)
-        .sort(sortEvent)
-        .reduce(normalizeEvent, {});
-
+      const data = parseEvents(json);
       setEvents(data);
       setLoading(false);
     }
@@ -95,28 +82,38 @@ const Calendar = () => {
     setWeek(nextWeek);
   }
 
-  if (loading) {
-    return <h1>Laddar...</h1>;
-  }
+  const weekNumber = loading ? '' : getWeekNumber(week[0]);
+  const today = new Date();
+
+  const isToday = date => {
+    const { isSameDay } = sameDay(today, date);
+    return isSameDay;
+  };
 
   return (
     <Wrapper>
-      <button onClick={goToPreviousWeek}>Förra vecka</button>
-      <Labels>
-        {cells.map(cell => isWholeHour(cell) && <Label key={cell.position}>{cell.hour}:00</Label>)}
-      </Labels>
-      <Week>
-        {week.map((date, i) => (
-          <Day
-            key={date.getDate()}
-            events={eventMap[date.getTime()]}
-            cells={cells}
-            date={date}
-            day={WEEK_DAYS[i]}
-          />
-        ))}
-      </Week>
-      <button onClick={goToNextWeek}>Nästa vecka</button>
+      <Header>
+        <SelectWeek
+          weekNumber={weekNumber}
+          goToPreviousWeek={goToPreviousWeek}
+          goToNextWeek={goToNextWeek}
+        />
+      </Header>
+      <Main>
+        <TimeLabels cells={cells} />
+        <Week>
+          {week.map((date, i) => (
+            <Day
+              key={loading ? i : date.getDate()}
+              events={loading ? [] : eventMap[date.getTime()]}
+              cells={cells}
+              date={loading ? null : date}
+              day={WEEK_DAYS[i]}
+              isToday={loading ? false : isToday(date)}
+            />
+          ))}
+        </Week>
+      </Main>
     </Wrapper>
   );
 };

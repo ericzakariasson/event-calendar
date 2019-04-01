@@ -52,7 +52,9 @@ function differenceInDays(d1, d2) {
 
 export function sameDay(d1, d2) {
   const isSameDay =
-    d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate();
   const day = isSameDay ? resetDate(d1) : null;
 
   return { isSameDay, day };
@@ -199,11 +201,36 @@ export function getNextWeek(week) {
 export function getPreviousWeek(week) {
   const lastDay = week[week.length - 1];
   const firstDayOfWeek = addDays(lastDay, -7);
-  console.log(firstDayOfWeek);
   const previousWeek = getWeekFromDate(firstDayOfWeek);
   return previousWeek;
 }
 
 export function setTime(date, { hours, minutes }) {
   return new Date(new Date(date).setHours(hours, minutes));
+}
+
+export function getWeekNumber(d) {
+  // Copy date so don't modify original
+  const copy = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  // Set to nearest Thursday: current date + 4 - current day number
+  // Make Sunday's day number 7
+  const currentDay = copy.getDay();
+  copy.setDate(copy.getDate() + 4 - (currentDay === 0 ? 7 : currentDay));
+  // Get first day of year
+  const yearStart = new Date(new Date(copy.getFullYear(), 0, 1));
+  // Calculate full weeks to nearest Thursday
+  const weekNo = Math.ceil((copy - yearStart) / 86400000 / 7);
+  // Return array of year and week number
+
+  return weekNo;
+}
+
+export function positionToTimeString(position) {
+  const timePosition = position / 2;
+
+  const hours = Math.trunc(timePosition);
+  const minutes = (timePosition - hours) * 60;
+  const formatted = `${hours.toString().padStart(2, 0)}:${minutes.toString().padStart(2, 0)}`;
+
+  return formatted;
 }

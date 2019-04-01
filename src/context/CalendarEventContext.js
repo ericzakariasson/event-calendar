@@ -1,6 +1,5 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
-import { createEventMap, setTime } from '../helpers';
-import { theme } from '../theme';
+import { createEventMap, setTime, positionToTime } from '../helpers';
 
 export const CalendarEventsContext = createContext();
 
@@ -19,6 +18,7 @@ export const CalendarEventsProvider = ({ children }) => {
   }, [events]);
 
   function handleMouseEnter(id) {
+    // If not moving
     if (!moving.id) {
       setHovered(id);
     }
@@ -45,8 +45,7 @@ export const CalendarEventsProvider = ({ children }) => {
     console.log('CONTEXT MOUSE UP');
 
     updateEvent(position);
-
-    // setMoving({ id: '', handle: '' });
+    setMoving({ id: '', handle: '' });
   }
 
   function updateEvent(position) {

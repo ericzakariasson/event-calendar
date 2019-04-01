@@ -6,6 +6,10 @@ import Event from './Event';
 const Wrapper = styled.article`
   flex: 1;
 
+  &:hover {
+    background: ${p => p.theme.colors.rgba.primary(3)};
+  }
+
   &:not(:last-child) {
     border-right: 1px solid #eee;
   }
@@ -34,13 +38,13 @@ const Cell = styled.li`
   }
 
   &:hover {
-    background: #eee;
+    background: red;
   }
 `;
 
 const Date = styled.span`
   text-align: center;
-  color: #ccc;
+  color: ${p => p.theme.colors.rgba.primary(p.today ? 75 : 25)};
   font-weight: 500;
 `;
 
@@ -48,8 +52,12 @@ const Header = styled.header`
   display: flex;
   flex-direction: column;
   height: 5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: ${p => (p.today ? `3px solid ${p.theme.colors.primary}` : '1px solid #EEE')};
   justify-content: center;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 `;
 
 const TimelineWrapper = styled.div`
@@ -64,15 +72,18 @@ const Timeline = styled.section`
   width: 100%;
 `;
 
-const Day = ({ day, date, cells, events }) => {
-  const month = date.getMonth();
+const Day = ({ day, date, cells, events, isToday }) => {
+  const hasDate = date || false;
+
   return (
     <Wrapper>
-      <Header>
+      <Header today={isToday}>
         <Name>{day.name}</Name>
-        <Date>
-          {date.getDate()}/{month === 0 ? 12 : month}
-        </Date>
+        {hasDate && (
+          <Date today={isToday}>
+            {date.getDate()}/{date.getMonth() + 1}
+          </Date>
+        )}
       </Header>
       <TimelineWrapper>
         <Timeline>{events && events.map(event => <Event key={event.id} {...event} />)}</Timeline>

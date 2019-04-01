@@ -1,5 +1,5 @@
 import React from 'react';
-import styled, { css, withTheme } from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { useCalendarEvent, useHandle } from '../hooks';
 
@@ -103,15 +103,15 @@ const formatOptions = {
   minute: '2-digit',
 };
 
-const Event = ({ id, start, end, theme }) => {
+const Event = ({ id, start: initialStart, end: initialEnd }) => {
   const { event, isHovered, isSelected, bind, handleDrag } = useCalendarEvent(id);
 
   const initialPositions = {
-    start: start.position,
-    end: end.position,
+    start: initialStart.position,
+    end: initialEnd.position,
   };
 
-  const { style, hasStart, hasEnd, isSmall, isDragging, handleMouseDown } = useHandle(
+  const { style, start, end, hasStart, hasEnd, isSmall, isDragging, handleMouseDown } = useHandle(
     id,
     initialPositions,
     handleDrag
@@ -128,6 +128,7 @@ const Event = ({ id, start, end, theme }) => {
       {hasStart && (
         <StartHandle visible={isActive} activity={event.activity} {...bindHandle('start')} />
       )}
+      {hasStart && !isSmall && <Starts>Starts {start.time}</Starts>}
 
       <Activity activity={event.activity}>{event.activity}</Activity>
       <Location>
@@ -135,14 +136,7 @@ const Event = ({ id, start, end, theme }) => {
         <LocationText>{event.location}</LocationText>
       </Location>
 
-      {hasStart && !isSmall && (
-        <Starts>Starts {start.time.toLocaleTimeString('sv-se', formatOptions)}</Starts>
-      )}
-
-      {hasEnd && !isSmall && (
-        <Ends>Ends {end.time.toLocaleTimeString('sv-se', formatOptions)}</Ends>
-      )}
-
+      {hasEnd && !isSmall && <Ends>Ends {end.time}</Ends>}
       {hasEnd && <EndHandle visible={isActive} activity={event.activity} {...bindHandle('end')} />}
 
       <Background hasEnd={hasEnd} hasStart={hasStart} activity={event.activity} active={isActive} />
