@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { WEEK_DAYS } from '../constants';
 import {
-  generateCells,
-  parseEvent,
   getWeekFromDate,
-  sortEvent,
   getNextWeek,
   getPreviousWeek,
   getWeekNumber,
   sameDay,
-} from '../helpers';
+} from '../date-helpers';
+
+import { generateCells, parseEventData } from '../helpers';
+
 import { useCalendarEvents } from '../context/CalendarEventContext';
 
 import Day from './Day';
@@ -35,17 +35,6 @@ const Week = styled.section`
 
 const cells = generateCells();
 
-function normalizeEvent(obj, item) {
-  obj[item.id] = item;
-  return obj;
-}
-
-const parseEvents = json =>
-  json
-    .map(parseEvent)
-    .sort(sortEvent)
-    .reduce(normalizeEvent, {});
-
 const Calendar = () => {
   const [week, setWeek] = useState([...WEEK_DAYS]);
   const { eventArray, eventMap, setEvents } = useCalendarEvents();
@@ -55,7 +44,7 @@ const Calendar = () => {
     async function fetchEvents() {
       const res = await fetch(process.env.REACT_APP_API_URL);
       const json = await res.json();
-      const data = parseEvents(json);
+      const data = parseEventData(json);
       setEvents(data);
       setLoading(false);
     }
@@ -67,7 +56,7 @@ const Calendar = () => {
       return;
     }
 
-    const firstEventDate = eventArray.sort(sortEvent)[0].startDate;
+    const firstEventDate = eventArray[0].startDate;
     const initialWeek = getWeekFromDate(firstEventDate);
     setWeek(initialWeek);
   }, [eventArray]);

@@ -1,72 +1,5 @@
 import { HOURS } from './constants';
-
-export function getDatesFromDateToN(date, n) {
-  const dates = Array.from({ length: n }, (_, i) => {
-    const incremented = addDays(date.valueOf(), i + 1);
-    return new Date(incremented);
-  });
-
-  return dates;
-}
-
-export function addDays(initialDate, days) {
-  const date = new Date(initialDate.valueOf());
-  date.setDate(date.getDate() + days);
-  return date;
-}
-
-export function getDates(startDate, endDate) {
-  const resettedStartDate = resetDate(startDate);
-  const resettedEndDate = resetDate(endDate);
-  const dayDiff = differenceInDays(resettedStartDate, resettedEndDate);
-
-  if (dayDiff === 0) {
-    throw new Error('No difference in days');
-  }
-
-  if (dayDiff === 1) {
-    return [resettedStartDate, resettedEndDate];
-  }
-
-  const dates = getDatesFromDateToN(resettedStartDate, dayDiff - 1);
-
-  return [resettedStartDate, ...dates, resettedEndDate];
-}
-
-export function getWeekFromDate(date) {
-  const day = date.getDay();
-  const difference = date.getDate() - day + (day === 0 ? -6 : 1);
-
-  const initialDay = resetDate(date.setDate(difference));
-  const restOfWeek = getDatesFromDateToN(initialDay, 6);
-
-  return [initialDay, ...restOfWeek];
-}
-
-function differenceInDays(d1, d2) {
-  const timeDifference = Math.abs(d2.getTime() - d1.getTime());
-  const dayDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
-
-  return dayDifference;
-}
-
-export function sameDay(d1, d2) {
-  const isSameDay =
-    d1.getFullYear() === d2.getFullYear() &&
-    d1.getMonth() === d2.getMonth() &&
-    d1.getDate() === d2.getDate();
-  const day = isSameDay ? resetDate(d1) : null;
-
-  return { isSameDay, day };
-}
-
-export function resetDate(date) {
-  return new Date(new Date(date).setHours(0, 0, 0, 0));
-}
-
-export function setMidnight(date) {
-  return new Date(new Date(date).setHours(24, 0, 0, 0));
-}
+import { sameDay, getDatesBetween, resetDate, setMidnight } from './date-helpers';
 
 export function createEventMap(events) {
   const eventArray = Object.keys(events).map(key => events[key]);
@@ -105,7 +38,7 @@ export function createEventMap(events) {
       return eventMap;
     }
 
-    const affectedDays = getDates(startDate, endDate);
+    const affectedDays = getDatesBetween(startDate, endDate);
 
     const firstAffectedDate = 0;
     const lastAffectedDate = affectedDays.length - 1;
@@ -117,6 +50,7 @@ export function createEventMap(events) {
         eventMap[dayId] = [];
       }
 
+      // Reset all dates by default
       const startTime = resetDate(day);
       const endTime = setMidnight(day);
 
@@ -165,21 +99,11 @@ export function timeToPosition(date, midnight) {
   return (hour + decimal) * 2;
 }
 
-export function parseEvent(event) {
-  return {
-    ...event,
-    startDate: new Date(event.startDate),
-    endDate: new Date(event.endDate),
-  };
-}
-
-export const sortEvent = (a, b) => a.startDate - b.startDate;
-export const isWholeHour = cell => (cell.position * 2) % 2 === 0;
-
 export function generateCells() {
+  // Half hour precision
   return Array.from({ length: HOURS * 2 }, (_, i) => {
     const position = i / 2;
-    const hour = parseInt(position);
+    const hour = Math.trunc(position);
     const minute = (position * 60) % 60;
     const formatted = `${hour.toString().padStart(2, 0)}:${minute.toString().padStart(2, 0)}`;
     return {
@@ -191,40 +115,6 @@ export function generateCells() {
   });
 }
 
-export function getNextWeek(week) {
-  const lastDay = week[week.length - 1];
-  const firstDayOfWeek = addDays(lastDay, 1);
-  const nextWeek = getWeekFromDate(firstDayOfWeek);
-  return nextWeek;
-}
-
-export function getPreviousWeek(week) {
-  const lastDay = week[week.length - 1];
-  const firstDayOfWeek = addDays(lastDay, -7);
-  const previousWeek = getWeekFromDate(firstDayOfWeek);
-  return previousWeek;
-}
-
-export function setTime(date, { hours, minutes }) {
-  return new Date(new Date(date).setHours(hours, minutes));
-}
-
-export function getWeekNumber(d) {
-  // Copy date so don't modify original
-  const copy = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  // Set to nearest Thursday: current date + 4 - current day number
-  // Make Sunday's day number 7
-  const currentDay = copy.getDay();
-  copy.setDate(copy.getDate() + 4 - (currentDay === 0 ? 7 : currentDay));
-  // Get first day of year
-  const yearStart = new Date(new Date(copy.getFullYear(), 0, 1));
-  // Calculate full weeks to nearest Thursday
-  const weekNo = Math.ceil((copy - yearStart) / 86400000 / 7);
-  // Return array of year and week number
-
-  return weekNo;
-}
-
 export function positionToTimeString(position) {
   const timePosition = position / 2;
 
@@ -233,4 +123,27 @@ export function positionToTimeString(position) {
   const formatted = `${hours.toString().padStart(2, 0)}:${minutes.toString().padStart(2, 0)}`;
 
   return formatted;
+}
+
+export const sortByDate = (a, b) => a.startDate - b.startDate;
+export const isWholeHour = cell => (cell.position * 2) % 2 === 0;
+
+function parseEvent(event) {
+  return {
+    ...event,
+    startDate: new Date(event.startDate),
+    endDate: new Date(event.endDate),
+  };
+}
+
+function normalize(obj, item) {
+  obj[item.id] = item;
+  return obj;
+}
+
+export function parseEventData(json) {
+  return json
+    .map(parseEvent)
+    .sort(sortByDate)
+    .reduce(normalize, {});
 }

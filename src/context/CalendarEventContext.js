@@ -1,5 +1,6 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
-import { createEventMap, setTime, positionToTime } from '../helpers';
+import { setTime } from '../date-helpers';
+import { createEventMap, sortByDate } from '../helpers';
 
 export const CalendarEventsContext = createContext();
 
@@ -10,7 +11,9 @@ export const CalendarEventsProvider = ({ children }) => {
   const [selected, setSelected] = useState('');
   const [moving, setMoving] = useState({ id: '', handle: '' });
 
-  const eventArray = Object.keys(events).map(key => events[key]);
+  const eventArray = Object.keys(events)
+    .map(key => events[key])
+    .sort(sortByDate);
 
   useEffect(() => {
     const createdEventMap = createEventMap(events);

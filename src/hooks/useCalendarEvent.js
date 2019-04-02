@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useCalendarEvents } from '../context/CalendarEventContext';
 
 function useCalendarEvent(id) {

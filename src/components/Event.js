@@ -98,11 +98,6 @@ const EndHandle = styled(DragHandle)`
   bottom: 0;
 `;
 
-const formatOptions = {
-  hour: '2-digit',
-  minute: '2-digit',
-};
-
 const Event = ({ id, start: initialStart, end: initialEnd }) => {
   const { event, isHovered, isSelected, bind, handleDrag } = useCalendarEvent(id);
 

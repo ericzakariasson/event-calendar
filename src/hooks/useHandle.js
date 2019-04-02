@@ -19,13 +19,11 @@ function useHandle(id, initialPositions, handleDrag) {
   };
 
   function handleMouseDown(handle) {
-    console.log('MOUSE DOWN');
     handleDrag.onMouseDown(id, handle);
     setActiveHandle(handle);
   }
 
   function handleMouseUp() {
-    console.log('MOUSE UP');
     handleDrag.onMouseUp(id, position);
     setActiveHandle('');
   }
